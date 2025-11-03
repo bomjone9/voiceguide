@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video Debug</title>
+  <style>body{font-family:sans-serif;padding:20px}video{width:100%;max-width:720px;border-radius:8px}</style>
+</head>
+<body>
+  <h2>디버그용 비디오 테스트</h2>
+  <p>비디오 파일 경로: <code>assets/guide.mp4</code></p>
+  <video id="dbg" controls preload="metadata">
+    <source src="assets/guide.mp4" type="video/mp4">
+    브라우저가 동영상을 지원하지 않습니다.
+  </video>
+
+  <pre id="log"></pre>
+
+  <script>
+    const v = document.getElementById('dbg');
+    const log = document.getElementById('log');
+    function L(s){ log.textContent += s + '\n'; console.log(s); }
+
+    v.addEventListener('error', (e) => {
+      const code = v.error ? v.error.code : 'no-code';
+      L('error event 발생 — code: ' + code);
+      L('video.error object: ' + JSON.stringify(v.error));
+    });
+    v.addEventListener('loadedmetadata', () => L('loadedmetadata — 메타데이터 로드됨'));
+    v.addEventListener('canplay', () => L('canplay — 재생 준비 완료'));
+    v.addEventListener('canplaythrough', () => L('canplaythrough — 버퍼링 없이 재생 가능'));
+    v.addEventListener('stalled', () => L('stalled — 로드 중단'));
+    v.addEventListener('suspend', () => L('suspend — 로드 일시중지'));
+    v.addEventListener('abort', () => L('abort — 중단됨'));
+    // 네트워크 상태 보고
+    window.addEventListener('load', () => {
+      fetch('assets/guide.mp4', { method: 'HEAD' })
+        .then(r => L('HEAD 요청 상태: ' + r.status + ' (' + r.statusText + ')'))
+        .catch(err => L('HEAD 요청 실패: ' + err));
+    });
+  </script>
+</body>
+</html>
